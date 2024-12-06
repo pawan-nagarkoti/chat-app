@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ChatPage() {
+  const navigate = useNavigate();
+
   return (
     <>
       <div className="bg-gray-200">
@@ -11,7 +14,10 @@ export default function ChatPage() {
               {/* First Row: Title and Logout */}
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-gray-700">Chats</h2>
-                <button className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300">
+                <button
+                  className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
+                  onClick={() => navigate("/")}
+                >
                   Logout
                 </button>
               </div>
@@ -33,7 +39,9 @@ export default function ChatPage() {
 
             <div className="p-4 space-y-4 overflow-y-auto h-[90vh] scroll-smooth">
               {/* Example Chat List */}
-              {Array.from({ length: 40 }).map((i, index) => (
+              {Array.from({
+                length: 40,
+              }).map((i, index) => (
                 <>
                   <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200">
                     <h3 className="text-sm font-medium text-gray-800">John Doe</h3>
@@ -57,7 +65,9 @@ export default function ChatPage() {
 
             {/* Chat Messages */}
             <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-              {Array.from({ length: 30 }).map((v, i) => (
+              {Array.from({
+                length: 30,
+              }).map((v, i) => (
                 <>
                   {/* Incoming Message */}
                   <div className="mb-4">
