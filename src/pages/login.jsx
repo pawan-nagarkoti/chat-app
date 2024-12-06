@@ -1,12 +1,34 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "../components";
+import { useState } from "react";
+import { requestHandler } from "@/utils";
+import { loginUser } from "@/api";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const handleLoginFormSubmit = (e) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLoginFormSubmit = async (e) => {
     e.preventDefault();
-    navigate("/chat");
+
+    // Use requestHandler to handle the API call
+    await requestHandler(
+      () => loginUser({ username, password }),
+      setLoading, // Set loading state
+      (data) => {
+        console.log("Login successful:", data);
+        alert("Login successful!");
+        navigate("/chat");
+      },
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
   };
+
   return (
     <>
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -15,17 +37,23 @@ export default function LoginPage() {
           <form onSubmit={handleLoginFormSubmit}>
             {/* Username Field */}
             <div className="mb-4">
-              <Input label="Username" type="text" placeholder="Enter your username" />
+              <Input label="Username" type="text" placeholder="Enter your username" onChange={(e) => setUsername(e.target.value)} />
             </div>
 
             {/* Password Field */}
             <div className="mb-4">
-              <Input label="Password" type="password" placeholder="Enter your password" />
+              <Input label="Password" type="password" placeholder="Enter your password" onChange={(e) => setPassword(e.target.value)} />
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
-              Login
+            <button
+              type="submit"
+              disabled={loading} // Disable button when loading
+              className={`w-full py-2 rounded-md ${
+                loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+              } text-white focus:outline-none focus:ring focus:ring-blue-300`}
+            >
+              {loading ? "Processing..." : "Login"}
             </button>
           </form>
           <div className="text-center mt-4">
