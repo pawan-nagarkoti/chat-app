@@ -1,24 +1,43 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "../components";
 import { useState } from "react";
 import { registerUser } from "@/api";
+import { requestHandler } from "@/utils";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate("");
 
-  const handleRegisterData = (e) => {
+  const handleRegisterData = async (e) => {
     e.preventDefault();
-    // create a object and send to the register payload api
+
+    // Create an object to send to the register API
     const registerUserDetail = {
       email,
       username,
       password,
       role: "ADMIN",
     };
-    registerUser(registerUserDetail);
+
+    // Use requestHandler to handle the API call
+    await requestHandler(
+      () => registerUser(registerUserDetail), // API call
+      setLoading, // Set loading state
+      (data) => {
+        console.log("Registration successful:", data);
+        alert("Registration successful!"); // Success message
+        navigate("/login");
+      },
+      (error) => {
+        console.error("Registration failed:", error);
+        alert(error); // Error message
+      }
+    );
   };
+
   return (
     <>
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -27,7 +46,7 @@ export default function RegisterPage() {
           <form onSubmit={handleRegisterData}>
             {/* Email field */}
             <div className="mb-4">
-              <Input label="email" type="email" placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} />
+              <Input label="Email" type="email" placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} />
             </div>
             {/* Username Field */}
             <div className="mb-4">
@@ -42,9 +61,12 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+              disabled={loading} // Disable button when loading
+              className={`w-full py-2 rounded-md ${
+                loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+              } text-white focus:outline-none focus:ring focus:ring-blue-300`}
             >
-              Login
+              {loading ? "Processing..." : "Register"}
             </button>
           </form>
           <div className="text-center mt-4">
