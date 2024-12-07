@@ -27,3 +27,7 @@ export const registerUser = (data) => {
 export const loginUser = (data) => {
   return apiClient.post("/users/login", data);
 };
+
+export const logout = () => {
+  return apiClient.post("/users/logout");
+};

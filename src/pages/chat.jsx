@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { logout } from "@/api";
+import { requestHandler } from "@/utils";
 
 export default function ChatPage() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    await requestHandler(
+      () => logout(),
+      setLoading,
+      (data) => {
+        localStorage.clear();
+        navigate("/login");
+        alert("Logout successful!");
+      },
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
+  };
 
   return (
     <>
@@ -16,7 +35,7 @@ export default function ChatPage() {
                 <h2 className="text-lg font-bold text-gray-700">Chats</h2>
                 <button
                   className="px-2 py-1 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
-                  onClick={() => navigate("/")}
+                  onClick={handleLogout}
                 >
                   Logout
                 </button>
