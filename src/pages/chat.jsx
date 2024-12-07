@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/api";
 import { requestHandler } from "@/utils";
+import CustomModal from "@/components/CustomModal";
+import { Children } from "react";
+import { Dropdown } from "@/components";
 
 export default function ChatPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleLogout = async () => {
     await requestHandler(
@@ -50,9 +55,52 @@ export default function ChatPage() {
                   className="flex-1 px-3 py-1 border rounded-md text-sm focus:outline-none focus:ring focus:ring-blue-300"
                 />
                 {/* Create Chat Button */}
-                <button className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
+                <button
+                  className="px-2 py-1 bg-blue-500 text-white text-xs font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                  onClick={() => setIsOpen(true)}
+                >
                   Create Chat
                 </button>
+
+                <CustomModal isOpen={isOpen} setIsOpen={setIsOpen}>
+                  <form action="">
+                    <div className="mb-3">
+                      <input type="checkbox" id="group-chat" name="subscribe" value="newsletter" /> &nbsp;
+                      <label for="group-chat">Is it a group chat? </label>
+                    </div>
+
+                    <div className="mb-3">
+                      <Dropdown
+                        ref={dropdownRef}
+                        label="select user to chat"
+                        options={[
+                          { value: "volvo", label: "Volvo" },
+                          { value: "saab", label: "Saab" },
+                          { value: "mercedes", label: "Mercedes" },
+                          { value: "audi", label: "Audi" },
+                        ]}
+                      />
+                    </div>
+
+                    <div className="flex gap-4 justify-center mt-5">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setIsOpen(false);
+                        }}
+                        className="px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                      >
+                        close
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                      >
+                        create
+                      </button>
+                    </div>
+                  </form>
+                </CustomModal>
               </div>
             </div>
 
