@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { logout } from "@/api";
+import { getUserList, logout } from "@/api";
 import { requestHandler } from "@/utils";
 import CustomModal from "@/components/CustomModal";
+import React, { useState, useRef, useEffect } from "react";
 import { Children } from "react";
 import { Dropdown } from "@/components";
 
@@ -11,7 +11,10 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [userList, setUsersList] = useState([]);
 
+  // Logout functionality
   const handleLogout = async () => {
     await requestHandler(
       () => logout(),
@@ -27,6 +30,29 @@ export default function ChatPage() {
       }
     );
   };
+
+  // get users list
+  const getUserListData = async () => {
+    await requestHandler(
+      () => getUserList("chat-app/chats/users"),
+      setChatLoading,
+      (data) => {
+        const options = data?.data?.map((v, i) => ({
+          value: v.username, // Set the value property
+          label: v.username, // Set the label property
+        }));
+        setUsersList(options);
+      },
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
+  };
+
+  useEffect(() => {
+    getUserListData();
+  }, []);
 
   return (
     <>
@@ -66,20 +92,11 @@ export default function ChatPage() {
                   <form action="">
                     <div className="mb-3">
                       <input type="checkbox" id="group-chat" name="subscribe" value="newsletter" /> &nbsp;
-                      <label for="group-chat">Is it a group chat? </label>
+                      <label htmlFor="group-chat">Is it a group chat? </label>
                     </div>
 
                     <div className="mb-3">
-                      <Dropdown
-                        ref={dropdownRef}
-                        label="select user to chat"
-                        options={[
-                          { value: "volvo", label: "Volvo" },
-                          { value: "saab", label: "Saab" },
-                          { value: "mercedes", label: "Mercedes" },
-                          { value: "audi", label: "Audi" },
-                        ]}
-                      />
+                      <Dropdown ref={dropdownRef} label="select user to chat" options={userList} />
                     </div>
 
                     <div className="flex gap-4 justify-center mt-5">
@@ -109,7 +126,7 @@ export default function ChatPage() {
               {Array.from({
                 length: 40,
               }).map((i, index) => (
-                <>
+                <div key={index}>
                   <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200">
                     <h3 className="text-sm font-medium text-gray-800">John Doe</h3>
                     <p className="text-xs text-gray-500 truncate">Last message preview...</p>
@@ -118,7 +135,7 @@ export default function ChatPage() {
                     <h3 className="text-sm font-medium text-gray-800">Jane Smith</h3>
                     <p className="text-xs text-gray-500 truncate">Another message preview...</p>
                   </div>
-                </>
+                </div>
               ))}
             </div>
           </div>
@@ -135,7 +152,7 @@ export default function ChatPage() {
               {Array.from({
                 length: 30,
               }).map((v, i) => (
-                <>
+                <div key={i}>
                   {/* Incoming Message */}
                   <div className="mb-4">
                     <div className="max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md">Hello! How are you?</div>
@@ -146,7 +163,7 @@ export default function ChatPage() {
                     <div className="inline-block max-w-sm p-3 bg-blue-500 text-white rounded-md">I'm good, thanks! What about you?</div>
                     <span className="text-xs text-gray-500">10:02 AM</span>
                   </div>
-                </>
+                </div>
               ))}
             </div>
 

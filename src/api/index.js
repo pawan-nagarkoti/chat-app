@@ -31,3 +31,7 @@ export const loginUser = (data) => {
 export const logout = () => {
   return apiClient.post("/users/logout");
 };
+
+export const getUserList = () => {
+  return apiClient.get("chat-app/chats/users");
+};
