@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { getUserList, logout } from "@/api";
+import { getUserList, logout, createUserChat } from "@/api";
 import { requestHandler } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
@@ -13,6 +13,7 @@ export default function ChatPage() {
   const dropdownRef = useRef(null);
   const [chatLoading, setChatLoading] = useState(false);
   const [userList, setUsersList] = useState([]);
+  const [selectedUserFromDropdown, setSelectedUserFromDropdown] = useState("");
 
   // Logout functionality
   const handleLogout = async () => {
@@ -38,7 +39,7 @@ export default function ChatPage() {
       setChatLoading,
       (data) => {
         const options = data?.data?.map((v, i) => ({
-          value: v.username, // Set the value property
+          value: v._id, // Set the value property
           label: v.username, // Set the label property
         }));
         setUsersList(options);
@@ -53,6 +54,25 @@ export default function ChatPage() {
   useEffect(() => {
     getUserListData();
   }, []);
+
+  const handleDropdownChange = (event) => {
+    setSelectedUserFromDropdown(event.target.value);
+  };
+
+  // create userchat list
+  const handleCreateUserChatList = async (e) => {
+    e.preventDefault();
+    await requestHandler(
+      () => createUserChat(selectedUserFromDropdown),
+      (data) => {
+        console.log("dataspr", data);
+      },
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
+  };
 
   return (
     <>
@@ -88,6 +108,7 @@ export default function ChatPage() {
                   Create Chat
                 </button>
 
+                {/* This modal is use for create group chat and add partipent on the group and create one to one chat */}
                 <CustomModal isOpen={isOpen} setIsOpen={setIsOpen}>
                   <form action="">
                     <div className="mb-3">
@@ -96,7 +117,7 @@ export default function ChatPage() {
                     </div>
 
                     <div className="mb-3">
-                      <Dropdown ref={dropdownRef} label="select user to chat" options={userList} />
+                      <Dropdown ref={dropdownRef} label="select user to chat" options={userList} onChange={handleDropdownChange} />
                     </div>
 
                     <div className="flex gap-4 justify-center mt-5">
@@ -112,6 +133,7 @@ export default function ChatPage() {
                       <button
                         type="submit"
                         className="px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                        onClick={handleCreateUserChatList}
                       >
                         create
                       </button>
