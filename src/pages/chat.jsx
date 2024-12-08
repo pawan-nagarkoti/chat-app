@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { getUserList, logout, createUserChat } from "@/api";
+import { getUserList, logout, createUserChat, allUserChatList } from "@/api";
 import { requestHandler } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
@@ -14,6 +14,7 @@ export default function ChatPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [userList, setUsersList] = useState([]);
   const [selectedUserFromDropdown, setSelectedUserFromDropdown] = useState("");
+  const [allUserChatListDetailData, setAllUserChatListDetailData] = useState("");
 
   // Logout functionality
   const handleLogout = async () => {
@@ -51,8 +52,24 @@ export default function ChatPage() {
     );
   };
 
+  // Get all list one-one and group list
+  const allUserChatListData = async () => {
+    await requestHandler(
+      () => allUserChatList(),
+      null,
+      (data) => {
+        setAllUserChatListDetailData(data);
+      },
+      (error) => {
+        console.error("chat list", error);
+        alert(error);
+      }
+    );
+  };
+
   useEffect(() => {
     getUserListData();
+    allUserChatListData();
   }, []);
 
   const handleDropdownChange = (event) => {
@@ -64,6 +81,7 @@ export default function ChatPage() {
     e.preventDefault();
     await requestHandler(
       () => createUserChat(selectedUserFromDropdown),
+      null,
       (data) => {
         console.log("dataspr", data);
       },
@@ -145,18 +163,10 @@ export default function ChatPage() {
 
             <div className="p-4 space-y-4 overflow-y-auto h-[90vh] scroll-smooth">
               {/* Example Chat List */}
-              {Array.from({
-                length: 40,
-              }).map((i, index) => (
-                <div key={index}>
-                  <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200">
-                    <h3 className="text-sm font-medium text-gray-800">John Doe</h3>
-                    <p className="text-xs text-gray-500 truncate">Last message preview...</p>
-                  </div>
-                  <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200">
-                    <h3 className="text-sm font-medium text-gray-800">Jane Smith</h3>
-                    <p className="text-xs text-gray-500 truncate">Another message preview...</p>
-                  </div>
+              {allUserChatListDetailData?.data?.map((v, i) => (
+                <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200">
+                  <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
+                  <p className="text-xs text-gray-500 truncate">Another message preview...</p>
                 </div>
               ))}
             </div>
