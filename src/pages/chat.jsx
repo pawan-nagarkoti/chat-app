@@ -18,6 +18,7 @@ export default function ChatPage() {
   const [allMessage, setAllMessage] = useState([]);
   const [chatId, getChatId] = useState("");
   const [sendInputMessage, getSendInputMessage] = useState("");
+  const [isClickedOnChatList, setIsClickedOnChatList] = useState(false);
 
   // Logout functionality
   const handleLogout = async () => {
@@ -112,6 +113,7 @@ export default function ChatPage() {
   const handleClickedChatList = (selectedId) => {
     getChatId(selectedId);
     getAllMessageData(selectedId);
+    setIsClickedOnChatList(true);
   };
 
   // Send message
@@ -122,6 +124,7 @@ export default function ChatPage() {
       content: sendInputMessage,
     };
     sendMessage(chatId, data);
+    getSendInputMessage("");
   };
 
   return (
@@ -195,7 +198,7 @@ export default function ChatPage() {
 
             <div className="p-4 space-y-4 overflow-y-auto h-[90vh] scroll-smooth">
               {allUserChatListDetailData?.data?.map((v, i) => (
-                <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200" onClick={() => handleClickedChatList(v._id)}>
+                <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200" onClick={() => handleClickedChatList(v._id)} key={i}>
                   <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
                   <p className="text-xs text-gray-500 truncate">Another message preview...</p>
                 </div>
@@ -210,38 +213,43 @@ export default function ChatPage() {
               <h2 className="text-lg font-bold text-gray-700">Chat with John Doe</h2>
             </div>
 
-            {/* Chat Messages */}
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-              {allMessage?.map((v, i) => (
-                <>
-                  {/* Incoming Message */}
-                  <div className="mb-4">
-                    <div className="max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md">{v.content}</div>
-                    {/* <span className="text-xs text-gray-500">10:00 AM</span> */}
-                  </div>
-                  {/* Outgoing Message */}
-                  {/* <div className="mb-4 text-right">
+            {isClickedOnChatList && (
+              <>
+                {/* Chat Messages */}
+                <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+                  {allMessage?.map((v, i) => (
+                    <div key={i}>
+                      {/* Incoming Message */}
+                      <div className="mb-4">
+                        <div className="max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md">{v.content}</div>
+                        {/* <span className="text-xs text-gray-500">10:00 AM</span> */}
+                      </div>
+                      {/* Outgoing Message */}
+                      {/* <div className="mb-4 text-right">
                     <div className="inline-block max-w-sm p-3 bg-blue-500 text-white rounded-md">I'm good, thanks! What about you?</div>
                     <span className="text-xs text-gray-500">10:02 AM</span>
                   </div> */}
-                </>
-              ))}
-            </div>
+                    </div>
+                  ))}
+                </div>
 
-            {/* Input Area */}
-            <div className="p-4 bg-white border-t">
-              <form className="flex items-center space-x-2" onSubmit={handleSendMessage}>
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-                  onChange={(e) => getSendInputMessage(e.target.value)}
-                />
-                <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                  Send
-                </button>
-              </form>
-            </div>
+                {/* Input Area */}
+                <div className="p-4 bg-white border-t">
+                  <form className="flex items-center space-x-2" onSubmit={handleSendMessage}>
+                    <input
+                      type="text"
+                      placeholder="Type a message..."
+                      value={sendInputMessage}
+                      className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+                      onChange={(e) => getSendInputMessage(e.target.value)}
+                    />
+                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                      Send
+                    </button>
+                  </form>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
