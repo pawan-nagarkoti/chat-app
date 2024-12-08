@@ -86,7 +86,10 @@ export default function ChatPage() {
     await requestHandler(
       () => createUserChat(selectedUserFromDropdown),
       null,
-      (data) => {},
+      (data) => {
+        setIsOpen(false);
+        allUserChatListData();
+      },
       (error) => {
         console.error("Login failed:", error);
         alert(error);
@@ -205,8 +208,11 @@ export default function ChatPage() {
                       </button>
                       <button
                         type="submit"
-                        className="px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                        className={`px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300
+                          ${selectedUserFromDropdown ? "" : "opacity-50 cursor-not-allowed"}
+                        `}
                         onClick={handleCreateUserChatList}
+                        disabled={!selectedUserFromDropdown}
                       >
                         create
                       </button>
