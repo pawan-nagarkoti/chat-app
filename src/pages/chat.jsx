@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage } from "@/api";
+import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage, deleteUserList } from "@/api";
 import { requestHandler } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
@@ -127,6 +127,26 @@ export default function ChatPage() {
     getSendInputMessage("");
   };
 
+  // delete user list
+  const deleteUser = async (deletedId) => {
+    await requestHandler(
+      () => deleteUserList(deletedId),
+      setLoading,
+      (data) => {
+        allUserChatListData();
+        alert("deleted user");
+      },
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
+  };
+  // get deleted list
+  const handleDeleteChat = (deletedId) => {
+    deleteUser(deletedId);
+  };
+
   return (
     <>
       <div className="bg-gray-200">
@@ -198,9 +218,16 @@ export default function ChatPage() {
 
             <div className="p-4 space-y-4 overflow-y-auto h-[90vh] scroll-smooth">
               {allUserChatListDetailData?.data?.map((v, i) => (
-                <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200" onClick={() => handleClickedChatList(v._id)} key={i}>
-                  <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
-                  <p className="text-xs text-gray-500 truncate">Another message preview...</p>
+                <div
+                  className="flex justify-between cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200"
+                  onClick={() => handleClickedChatList(v._id)}
+                  key={i}
+                >
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
+                    <p className="text-xs text-gray-500 truncate">Another message preview...</p>
+                  </div>
+                  <div onClick={() => handleDeleteChat(v._id)}>&#128465;</div>
                 </div>
               ))}
             </div>
