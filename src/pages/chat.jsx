@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { getUserList, logout, createUserChat, allUserChatList } from "@/api";
+import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage } from "@/api";
 import { requestHandler } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
@@ -15,6 +15,9 @@ export default function ChatPage() {
   const [userList, setUsersList] = useState([]);
   const [selectedUserFromDropdown, setSelectedUserFromDropdown] = useState("");
   const [allUserChatListDetailData, setAllUserChatListDetailData] = useState("");
+  const [allMessage, setAllMessage] = useState([]);
+  const [chatId, getChatId] = useState("");
+  const [sendInputMessage, getSendInputMessage] = useState("");
 
   // Logout functionality
   const handleLogout = async () => {
@@ -82,14 +85,43 @@ export default function ChatPage() {
     await requestHandler(
       () => createUserChat(selectedUserFromDropdown),
       null,
+      (data) => {},
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
+  };
+
+  // Get all message
+  const getAllMessageData = async (selectedId) => {
+    await requestHandler(
+      () => getAllMessages(selectedId),
+      null,
       (data) => {
-        console.log("dataspr", data);
+        setAllMessage(data?.data);
       },
       (error) => {
         console.error("Login failed:", error);
         alert(error);
       }
     );
+  };
+
+  // get the id when we clicked on chat list
+  const handleClickedChatList = (selectedId) => {
+    getChatId(selectedId);
+    getAllMessageData(selectedId);
+  };
+
+  // Send message
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    const data = {
+      attachments: "",
+      content: sendInputMessage,
+    };
+    sendMessage(chatId, data);
   };
 
   return (
@@ -162,9 +194,8 @@ export default function ChatPage() {
             </div>
 
             <div className="p-4 space-y-4 overflow-y-auto h-[90vh] scroll-smooth">
-              {/* Example Chat List */}
               {allUserChatListDetailData?.data?.map((v, i) => (
-                <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200">
+                <div className="cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200" onClick={() => handleClickedChatList(v._id)}>
                   <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
                   <p className="text-xs text-gray-500 truncate">Another message preview...</p>
                 </div>
@@ -181,31 +212,30 @@ export default function ChatPage() {
 
             {/* Chat Messages */}
             <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
-              {Array.from({
-                length: 30,
-              }).map((v, i) => (
-                <div key={i}>
+              {allMessage?.map((v, i) => (
+                <>
                   {/* Incoming Message */}
                   <div className="mb-4">
-                    <div className="max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md">Hello! How are you?</div>
-                    <span className="text-xs text-gray-500">10:00 AM</span>
+                    <div className="max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md">{v.content}</div>
+                    {/* <span className="text-xs text-gray-500">10:00 AM</span> */}
                   </div>
                   {/* Outgoing Message */}
-                  <div className="mb-4 text-right">
+                  {/* <div className="mb-4 text-right">
                     <div className="inline-block max-w-sm p-3 bg-blue-500 text-white rounded-md">I'm good, thanks! What about you?</div>
                     <span className="text-xs text-gray-500">10:02 AM</span>
-                  </div>
-                </div>
+                  </div> */}
+                </>
               ))}
             </div>
 
             {/* Input Area */}
             <div className="p-4 bg-white border-t">
-              <form className="flex items-center space-x-2">
+              <form className="flex items-center space-x-2" onSubmit={handleSendMessage}>
                 <input
                   type="text"
                   placeholder="Type a message..."
                   className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+                  onChange={(e) => getSendInputMessage(e.target.value)}
                 />
                 <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                   Send

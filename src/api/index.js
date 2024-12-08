@@ -43,3 +43,11 @@ export const createUserChat = (receiverId) => {
 export const allUserChatList = () => {
   return apiClient.get(`/chat-app/chats`);
 };
+
+export const getAllMessages = (chatId) => {
+  return apiClient.get(`chat-app/messages/${chatId}`);
+};
+
+export const sendMessage = (chatId, data) => {
+  return apiClient.post(`chat-app/messages/${chatId}`, data);
+};
