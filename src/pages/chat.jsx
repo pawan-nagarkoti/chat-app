@@ -19,6 +19,7 @@ export default function ChatPage() {
   const [chatId, getChatId] = useState("");
   const [sendInputMessage, getSendInputMessage] = useState("");
   const [isClickedOnChatList, setIsClickedOnChatList] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Logout functionality
   const handleLogout = async () => {
@@ -122,11 +123,14 @@ export default function ChatPage() {
   // Send message
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    const data = {
-      attachments: "",
-      content: sendInputMessage,
-    };
-    sendMessage(chatId, data);
+    const formData = new FormData();
+    formData.append("content", sendInputMessage);
+
+    Array.from(selectedFiles).forEach((file) => {
+      formData.append("attachments", file);
+    });
+
+    sendMessage(chatId, formData);
     getSendInputMessage("");
   };
 
@@ -150,6 +154,17 @@ export default function ChatPage() {
     deleteUser(deletedId);
   };
 
+  // Selete image form local devices
+  const handleFileSelected = (e) => {
+    const files = Array.from(e.target.files);
+
+    // Check if the selected files plus already selected files exceed the limit of 5
+    if (selectedFiles.length + files.length <= 5) {
+      setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+    } else {
+      alert("You can only select up to 5 images.");
+    }
+  };
   return (
     <>
       <div className="bg-gray-200">
@@ -266,9 +281,44 @@ export default function ChatPage() {
                   ))}
                 </div>
 
+                {/* selected images */}
+                <div className="flex gap-4">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        key={index}
+                        src={URL.createObjectURL(file)}
+                        alt={`Uploaded Preview ${index + 1}`}
+                        className="w-24 h-24 object-cover rounded"
+                      />
+                      <button
+                        onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i != index))}
+                        className="absolute top-0 right-0 bg-gray-600 text-white rounded-full p-1"
+                        style={{ transform: "translate(10%, -10%)" }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Input Area */}
                 <div className="p-4 bg-white border-t">
                   <form className="flex items-center space-x-2" onSubmit={handleSendMessage}>
+                    <div className="relative w-12 h-12 flex items-center justify-center text-4xl cursor-pointer">
+                      <span role="button" aria-label="Upload File">
+                        &#43;
+                      </span>
+                      <input
+                        type="file"
+                        id="fileInput"
+                        accept="image/*"
+                        max={5}
+                        multiple
+                        className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleFileSelected}
+                      />
+                    </div>
                     <input
                       type="text"
                       placeholder="Type a message..."
