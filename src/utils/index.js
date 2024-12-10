@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const requestHandler = async (api, setLoading, onSuccess, onError) => {
   // Show loading state if setLoading function is provided
   if (setLoading) setLoading(true);
@@ -27,5 +29,21 @@ export const requestHandler = async (api, setLoading, onSuccess, onError) => {
   } finally {
     // Hide loading state if setLoading function is provided
     if (setLoading) setLoading(false);
+  }
+};
+
+export const formatTime = (isoDate) => {
+  const now = moment(); // Current time
+  const timeSent = moment(isoDate); // Time from the input
+  const duration = moment.duration(now.diff(timeSent)); // Calculate difference
+
+  if (duration.asSeconds() < 60) {
+    return `${Math.floor(duration.asSeconds())} s ago`;
+  } else if (duration.asMinutes() < 60) {
+    return `${Math.floor(duration.asMinutes())} m ago`;
+  } else if (duration.asHours() < 24) {
+    return `${Math.floor(duration.asHours())} h ago`;
+  } else {
+    return timeSent.format("dddd, MMMM Do YYYY, h:mm A"); // Specific date if older than a day
   }
 };

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage, deleteUserList } from "@/api";
-import { requestHandler } from "@/utils";
+import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
 import { Children } from "react";
@@ -130,8 +130,19 @@ export default function ChatPage() {
       formData.append("attachments", file);
     });
 
-    sendMessage(chatId, formData);
-    getSendInputMessage("");
+    await requestHandler(
+      () => sendMessage(chatId, formData),
+      null,
+      async (data) => {
+        getSendInputMessage("");
+        setSelectedFiles([]);
+        await allUserChatListData();
+      },
+      (error) => {
+        console.error("Login failed:", error);
+        alert(error);
+      }
+    );
   };
 
   // delete user list
@@ -246,9 +257,16 @@ export default function ChatPage() {
                 >
                   <div>
                     <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
-                    <p className="text-xs text-gray-500 truncate">Another message preview...</p>
+                    <p className="text-xs text-gray-500 truncate">{v?.lastMessage?.content}</p>
                   </div>
-                  <div onClick={() => handleDeleteChat(v._id)}>&#128465;</div>
+                  <div className="flex gap-3 items-center justify-center">
+                    {formatTime(v?.lastMessage?.updatedAt) !== "0 s ago" && (
+                      <div className="text-[.8rem]">{formatTime(v?.lastMessage?.updatedAt)}</div>
+                    )}
+                    <div onClick={() => handleDeleteChat(v._id)} className="cursor text-[.8rem]">
+                      &#128465;
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
