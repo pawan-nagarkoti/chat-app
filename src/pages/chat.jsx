@@ -257,21 +257,43 @@ export default function ChatPage() {
             <div className="p-4 space-y-4 overflow-y-auto h-[90vh] scroll-smooth">
               {allUserChatListDetailData?.data?.map((v, i) => (
                 <div
-                  className="flex justify-between cursor-pointer p-3 bg-gray-50 rounded-md hover:bg-gray-200"
-                  onClick={() => handleClickedChatList(v._id)}
-                  key={i}
+                  key={i} // Ensures uniqueness
+                  className="flex justify-between items-center p-3 bg-gray-50 rounded-md hover:bg-gray-200 cursor-pointer"
+                  onClick={() => handleClickedChatList(v._id)} // Handles click for the chat list
                 >
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-800">{handleSenderMessagerName(v).username}</h3>
-                    <p className="text-xs text-gray-500 truncate">{v?.lastMessage?.content}</p>
-                  </div>
-                  <div className="flex gap-3 items-center justify-center">
-                    {formatTime(v?.lastMessage?.updatedAt) !== "0 s ago" && (
-                      <div className="text-[.8rem]">{formatTime(v?.lastMessage?.updatedAt)}</div>
-                    )}
-                    <div onClick={() => handleDeleteChat(v._id)} className="cursor text-[.8rem]">
-                      &#128465;
+                  {/* User Avatar */}
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={handleSenderMessagerName(v).avatar.url ? handleSenderMessagerName(v).avatar.url : `https://dummyjson.com/image/150`}
+                      alt={`${handleSenderMessagerName(v).username}'s avatar`}
+                      className="border border-gray-300 w-12 h-12 rounded-full"
+                    />
+                    <div className="flex flex-col">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-800">{handleSenderMessagerName(v).username}</h3>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate max-w-[12rem] mt-1">{v?.lastMessage?.content || "No recent messages"}</p>
                     </div>
+                  </div>
+
+                  {/* Message Details */}
+                  <div className="flex items-center gap-3">
+                    {/* Time */}
+                    {formatTime(v?.lastMessage?.updatedAt) !== "0 s ago" && (
+                      <span className="text-[.8rem] text-gray-600 whitespace-nowrap">{formatTime(v?.lastMessage?.updatedAt)}</span>
+                    )}
+
+                    {/* Delete Icon */}
+                    <span
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevents triggering the parent click
+                        handleDeleteChat(v._id);
+                      }}
+                      className="text-gray-600 hover:text-red-500 text-[.8rem] cursor-pointer"
+                      title="Delete chat"
+                    >
+                      &#128465;
+                    </span>
                   </div>
                 </div>
               ))}
