@@ -19,6 +19,7 @@ export default function LoginPage() {
       setLoading, // Set loading state
       (data) => {
         localStorage.setItem("token", data?.data?.accessToken);
+        localStorage.setItem("loginUserId", data?.data?.user?._id);
         alert("Login successful!");
         navigate("/chat");
       },

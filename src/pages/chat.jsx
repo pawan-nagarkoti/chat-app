@@ -104,7 +104,7 @@ export default function ChatPage() {
       () => getAllMessages(selectedId),
       null,
       (data) => {
-        setAllMessage(data?.data);
+        setAllMessage(data?.data.reverse());
       },
       (error) => {
         console.error("Login failed:", error);
@@ -137,6 +137,7 @@ export default function ChatPage() {
         getSendInputMessage("");
         setSelectedFiles([]);
         await allUserChatListData();
+        await getAllMessageData(chatId);
       },
       (error) => {
         console.error("Login failed:", error);
@@ -175,6 +176,11 @@ export default function ChatPage() {
     } else {
       alert("You can only select up to 5 images.");
     }
+  };
+
+  // this method is used for handle the participant means whose sended the message
+  const handleSenderMessagerName = (item) => {
+    return item.participants?.find((v) => v._id !== localStorage.getItem("loginUserId"));
   };
   return (
     <>
@@ -256,7 +262,7 @@ export default function ChatPage() {
                   key={i}
                 >
                   <div>
-                    <h3 className="text-sm font-medium text-gray-800">{v.participants[1].username}</h3>
+                    <h3 className="text-sm font-medium text-gray-800">{handleSenderMessagerName(v).username}</h3>
                     <p className="text-xs text-gray-500 truncate">{v?.lastMessage?.content}</p>
                   </div>
                   <div className="flex gap-3 items-center justify-center">
@@ -287,7 +293,16 @@ export default function ChatPage() {
                     <div key={i}>
                       {/* Incoming Message */}
                       <div className="mb-4">
-                        <div className="max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md">{v.content}</div>
+                        <h1>{v.sender._id === localStorage.getItem("loginUserId")}</h1>
+                        {/* isOwnMessage={msg.sender?._id === user?._id} */}
+
+                        <div
+                          className={`max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md
+                        ${v.sender._id !== localStorage.getItem("loginUserId") ? "ml-auto" : ""}`}
+                        >
+                          {v?.attachments?.length > 0 ? v?.attachments?.map((v, i) => <img src={v.url} alt="img" key={i} />) : ""}
+                          {v.content}
+                        </div>
                         {/* <span className="text-xs text-gray-500">10:00 AM</span> */}
                       </div>
                       {/* Outgoing Message */}
