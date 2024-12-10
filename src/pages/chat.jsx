@@ -300,7 +300,15 @@ export default function ChatPage() {
                           className={`max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md
                         ${v.sender._id !== localStorage.getItem("loginUserId") ? "ml-auto" : ""}`}
                         >
-                          {v?.attachments?.length > 0 ? v?.attachments?.map((v, i) => <img src={v.url} alt="img" key={i} />) : ""}
+                          {v?.attachments?.length > 0 ? (
+                            <div className={`grid grid-cols-2 gap-3`}>
+                              {v?.attachments?.map((v, i) => (
+                                <img src={v.url} alt="img" key={i} className="w-[100%] h-[7rem] mb-3" />
+                              ))}
+                            </div>
+                          ) : (
+                            ""
+                          )}
                           {v.content}
                         </div>
                         {/* <span className="text-xs text-gray-500">10:00 AM</span> */}
@@ -322,7 +330,7 @@ export default function ChatPage() {
                         key={index}
                         src={URL.createObjectURL(file)}
                         alt={`Uploaded Preview ${index + 1}`}
-                        className="w-24 h-24 object-cover rounded"
+                        className="w-20 h-20 object-cover rounded"
                       />
                       <button
                         onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i != index))}
