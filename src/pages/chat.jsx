@@ -320,7 +320,7 @@ export default function ChatPage() {
 
                         <div
                           className={`max-w-sm p-3 bg-blue-100 text-gray-800 rounded-md
-                        ${v.sender._id !== localStorage.getItem("loginUserId") ? "ml-auto" : ""}`}
+                        ${v.sender._id !== localStorage.getItem("loginUserId") ? "ml-auto" : "bg-blue-400 text-white"}`}
                         >
                           {v?.attachments?.length > 0 ? (
                             <div className={`grid grid-cols-2 gap-3`}>
@@ -337,9 +337,9 @@ export default function ChatPage() {
                       </div>
                       {/* Outgoing Message */}
                       {/* <div className="mb-4 text-right">
-                    <div className="inline-block max-w-sm p-3 bg-blue-500 text-white rounded-md">I'm good, thanks! What about you?</div>
-                    <span className="text-xs text-gray-500">10:02 AM</span>
-                  </div> */}
+                        <div className="inline-block max-w-sm p-3 bg-blue-500 text-white rounded-md">I'm good, thanks! What about you?</div>
+                        <span className="text-xs text-gray-500">10:02 AM</span>
+                      </div> */}
                     </div>
                   ))}
                 </div>
