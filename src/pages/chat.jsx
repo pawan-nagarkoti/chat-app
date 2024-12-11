@@ -4,7 +4,7 @@ import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
 import { Children } from "react";
-import { Dropdown } from "@/components";
+import { Dropdown, MultiSelect, Input } from "@/components";
 import moment from "moment";
 
 export default function ChatPage() {
@@ -22,6 +22,25 @@ export default function ChatPage() {
   const [isClickedOnChatList, setIsClickedOnChatList] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [selectedUsername, setSelectedUsername] = useState("");
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const multiSelectRef = useRef();
+  const [handleToggleButton, setHandleToggleButton] = useState(false);
+  const options = [
+    { value: "chocolate", label: "Chocolate" },
+    { value: "strawberry", label: "Strawberry" },
+    { value: "vanilla", label: "Vanilla" },
+  ];
+
+  const handleChange = (selected) => {
+    setSelectedOptions(selected);
+    console.log(selected);
+  };
+
+  // const clearSelection = () => {
+  //   if (multiSelectRef.current) {
+  //     multiSelectRef.current.clearValue(); // Clear selected options
+  //   }
+  // };
 
   // Logout functionality
   const handleLogout = async () => {
@@ -239,13 +258,38 @@ export default function ChatPage() {
                 <CustomModal isOpen={isOpen} setIsOpen={setIsOpen}>
                   <form action="">
                     <div className="mb-3">
-                      <input type="checkbox" id="group-chat" name="subscribe" value="newsletter" /> &nbsp;
+                      <input
+                        type="checkbox"
+                        id="group-chat"
+                        name="subscribe"
+                        value="newsletter"
+                        onChange={() => setHandleToggleButton((pre) => !pre)}
+                      />{" "}
+                      &nbsp;
                       <label htmlFor="group-chat">Is it a group chat? </label>
                     </div>
 
-                    <div className="mb-3">
-                      <Dropdown ref={dropdownRef} label="select user to chat" options={userList} onChange={handleDropdownChange} />
-                    </div>
+                    {handleToggleButton ? (
+                      <>
+                        <div>
+                          <div className="mb-4">
+                            <Input label="Group Name" type="text" placeholder="Enter group name" />
+                          </div>
+                          <div className="mb-4">
+                            <div className="text-sm mb-2">Group Participant</div>
+                            <MultiSelect ref={multiSelectRef} options={options} onChange={handleChange} placeholder="Select group participants" />
+                            {/* <button onClick={clearSelection}>Clear Selection</button> */}
+                            <p className="text-sm mt-3">Selected: {selectedOptions.map((opt) => opt.label).join(", ")}</p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="mb-3">
+                          <Dropdown ref={dropdownRef} label="select user to chat" options={userList} onChange={handleDropdownChange} />
+                        </div>
+                      </>
+                    )}
 
                     <div className="flex gap-4 justify-center mt-5">
                       <button
