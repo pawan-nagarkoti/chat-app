@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage, deleteUserList } from "@/api";
+import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage, deleteUserList, deleteSingleMessage } from "@/api";
 import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
 import { Children } from "react";
 import { Dropdown } from "@/components";
+import moment from "moment";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export default function ChatPage() {
   const [sendInputMessage, getSendInputMessage] = useState("");
   const [isClickedOnChatList, setIsClickedOnChatList] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [selectedUsername, setSelectedUsername] = useState("");
 
   // Logout functionality
   const handleLogout = async () => {
@@ -114,7 +116,8 @@ export default function ChatPage() {
   };
 
   // get the id when we clicked on chat list
-  const handleClickedChatList = (selectedId) => {
+  const handleClickedChatList = (selectedId, v) => {
+    setSelectedUsername(handleSenderMessagerName(v));
     getChatId(selectedId);
     getAllMessageData(selectedId);
     setIsClickedOnChatList(true);
@@ -181,6 +184,22 @@ export default function ChatPage() {
   // this method is used for handle the participant means whose sended the message
   const handleSenderMessagerName = (item) => {
     return item.participants?.find((v) => v._id !== localStorage.getItem("loginUserId"));
+  };
+
+  // Delete one one chat message
+  const handleDeleteSingleChatItem = async (deletedChatId, deletedMessageId) => {
+    await requestHandler(
+      () => deleteSingleMessage(deletedChatId, deletedMessageId),
+      null,
+      (data) => {
+        getAllMessageData(chatId);
+        confirm("Are you sure you want to delte this message");
+      },
+      (error) => {
+        console.error("Delete one one chat :", error);
+        alert(error);
+      }
+    );
   };
   return (
     <>
@@ -259,7 +278,7 @@ export default function ChatPage() {
                 <div
                   key={i} // Ensures uniqueness
                   className="flex justify-between items-center p-3 bg-gray-50 rounded-md hover:bg-gray-200 cursor-pointer"
-                  onClick={() => handleClickedChatList(v._id)} // Handles click for the chat list
+                  onClick={() => handleClickedChatList(v._id, v)} // Handles click for the chat list
                 >
                   {/* User Avatar */}
                   <div className="flex items-center gap-3">
@@ -279,11 +298,13 @@ export default function ChatPage() {
                   {/* Message Details */}
                   <div className="flex items-center gap-3">
                     {/* Time */}
-                    {formatTime(v?.lastMessage?.updatedAt) !== "0 s ago" && (
+                    {/* {formatTime(v?.lastMessage?.updatedAt) !== "0 s ago" && (
                       <span className="text-[.8rem] text-gray-600 whitespace-nowrap">{formatTime(v?.lastMessage?.updatedAt)}</span>
-                    )}
+                    )} */}
 
-                    {/* Delete Icon */}
+                    <span className="text-[.8rem] text-gray-600 whitespace-nowrap">
+                      {moment(v?.lastMessage?.updatedAt).add("TIME_ZONE", "hours").fromNow(true)} {/* Delete Icon */}
+                    </span>
                     <span
                       onClick={(e) => {
                         e.stopPropagation(); // Prevents triggering the parent click
@@ -303,12 +324,12 @@ export default function ChatPage() {
           {/* Right Chat Section */}
           <div className="flex-1 flex flex-col">
             {/* Header */}
-            <div className="p-4 bg-white shadow-md">
-              <h2 className="text-lg font-bold text-gray-700">Chat with John Doe</h2>
-            </div>
-
             {isClickedOnChatList && (
               <>
+                <div className="p-4 bg-white shadow-md">
+                  <h2 className="text-lg font-bold text-gray-700">{selectedUsername?.username.toUpperCase()}</h2>
+                  <p>{selectedUsername?.email}</p>
+                </div>
                 {/* Chat Messages */}
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
                   {allMessage?.map((v, i) => (
@@ -331,7 +352,17 @@ export default function ChatPage() {
                           ) : (
                             ""
                           )}
-                          {v.content}
+                          <div className="flex justify-between">
+                            <div>{v.content}</div>
+
+                            {v.sender._id === localStorage.getItem("loginUserId") ? (
+                              <div className="cursor-pointer" onClick={() => handleDeleteSingleChatItem(v.chat, v._id)}>
+                                &#128465;
+                              </div>
+                            ) : (
+                              ""
+                            )}
+                          </div>
                         </div>
                         {/* <span className="text-xs text-gray-500">10:00 AM</span> */}
                       </div>

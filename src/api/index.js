@@ -55,3 +55,7 @@ export const sendMessage = (chatId, data) => {
 export const deleteUserList = (deletedId) => {
   return apiClient.delete(`chat-app/chats/remove/${deletedId}`);
 };
+
+export const deleteSingleMessage = (deletedChatId, deletedMessageId) => {
+  return apiClient.delete(`chat-app/messages/${deletedChatId}/${deletedMessageId}`);
+};
