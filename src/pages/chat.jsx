@@ -4,7 +4,7 @@ import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
 import { Children } from "react";
-import { Dropdown, MultiSelect, Input } from "@/components";
+import { Dropdown, MultiSelect, Input, CustomSlider } from "@/components";
 import moment from "moment";
 
 export default function ChatPage() {
@@ -25,6 +25,8 @@ export default function ChatPage() {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const multiSelectRef = useRef();
   const [handleToggleButton, setHandleToggleButton] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false); // this is used for toggle side drawer
+
   const options = [
     { value: "chocolate", label: "Chocolate" },
     { value: "strawberry", label: "Strawberry" },
@@ -220,8 +222,16 @@ export default function ChatPage() {
       }
     );
   };
+
+  const toggleSheet = (open) => {
+    setIsSheetOpen(open);
+  };
   return (
     <>
+      <div>
+        <button onClick={() => setIsSheetOpen(true)}>Open Slider</button>
+        <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet} />
+      </div>
       <div className="bg-gray-200">
         <div className="flex h-screen bg-gray-200 overflow-hidden">
           {/* Left Sidebar */}
