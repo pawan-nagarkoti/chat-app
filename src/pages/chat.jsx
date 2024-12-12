@@ -1,5 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { getUserList, logout, createUserChat, allUserChatList, getAllMessages, sendMessage, deleteUserList, deleteSingleMessage } from "@/api";
+import {
+  getUserList,
+  logout,
+  createUserChat,
+  allUserChatList,
+  getAllMessages,
+  sendMessage,
+  deleteUserList,
+  deleteSingleMessage,
+  createGroupChat,
+} from "@/api";
 import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
 import React, { useState, useRef, useEffect } from "react";
@@ -26,12 +36,7 @@ export default function ChatPage() {
   const multiSelectRef = useRef();
   const [handleToggleButton, setHandleToggleButton] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false); // this is used for toggle side drawer
-
-  const options = [
-    { value: "chocolate", label: "Chocolate" },
-    { value: "strawberry", label: "Strawberry" },
-    { value: "vanilla", label: "Vanilla" },
-  ];
+  const [getGroupChatName, setGetGroupChatName] = useState("");
 
   const handleChange = (selected) => {
     setSelectedOptions(selected);
@@ -107,18 +112,36 @@ export default function ChatPage() {
   // create userchat list
   const handleCreateUserChatList = async (e) => {
     e.preventDefault();
-    await requestHandler(
-      () => createUserChat(selectedUserFromDropdown),
-      null,
-      (data) => {
-        setIsOpen(false);
-        allUserChatListData();
-      },
-      (error) => {
-        console.error("Login failed:", error);
-        alert(error);
-      }
-    );
+
+    !handleToggleButton
+      ? await requestHandler(
+          () => createUserChat(selectedUserFromDropdown),
+          null,
+          (data) => {
+            setIsOpen(false);
+            allUserChatListData();
+          },
+          (error) => {
+            console.error("One on One chat:", error);
+            alert(error);
+          }
+        )
+      : await requestHandler(
+          () =>
+            createGroupChat({
+              name: getGroupChatName,
+              participants: selectedOptions?.map((v) => v.value),
+            }),
+          null,
+          (data) => {
+            setIsOpen(false);
+            allUserChatListData();
+          },
+          (error) => {
+            console.error("Create Group Chat:", error);
+            alert(error);
+          }
+        );
   };
 
   // Get all message
@@ -283,11 +306,16 @@ export default function ChatPage() {
                       <>
                         <div>
                           <div className="mb-4">
-                            <Input label="Group Name" type="text" placeholder="Enter group name" />
+                            <Input
+                              label="Group Name"
+                              type="text"
+                              placeholder="Enter group name"
+                              onChange={(e) => setGetGroupChatName(e.target.value)}
+                            />
                           </div>
                           <div className="mb-4">
                             <div className="text-sm mb-2">Group Participant</div>
-                            <MultiSelect ref={multiSelectRef} options={options} onChange={handleChange} placeholder="Select group participants" />
+                            <MultiSelect ref={multiSelectRef} options={userList} onChange={handleChange} placeholder="Select group participants" />
                             {/* <button onClick={clearSelection}>Clear Selection</button> */}
                             <p className="text-sm mt-3">Selected: {selectedOptions.map((opt) => opt.label).join(", ")}</p>
                           </div>
@@ -311,16 +339,51 @@ export default function ChatPage() {
                       >
                         close
                       </button>
+
                       <button
                         type="submit"
-                        className={`px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300
+                        className={`px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300 ${
+                          handleToggleButton
+                            ? selectedOptions.length > 0 && getGroupChatName !== ""
+                              ? ""
+                              : "opacity-50 cursor-not-allowed"
+                            : selectedUserFromDropdown
+                            ? ""
+                            : "opacity-50 cursor-not-allowed"
+                        }`}
+                        onClick={handleCreateUserChatList}
+                        disabled={handleToggleButton ? !(selectedOptions.length > 0 && getGroupChatName) : !selectedUserFromDropdown}
+                      >
+                        Create
+                      </button>
+
+                      {/* {handleToggleButton ? (
+                        <>
+                          <button
+                            type="submit"
+                            className={`px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300
+                          ${selectedOptions.length > 0 && getGroupChatName !== "" ? "" : "opacity-50 cursor-not-allowed"}
+                        `}
+                            onClick={handleCreateUserChatList}
+                            disabled={!selectedOptions.length > 0 && getGroupChatName !== ""}
+                          >
+                            create something
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="submit"
+                            className={`px-2 py-1 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300
                           ${selectedUserFromDropdown ? "" : "opacity-50 cursor-not-allowed"}
                         `}
-                        onClick={handleCreateUserChatList}
-                        disabled={!selectedUserFromDropdown}
-                      >
-                        create
-                      </button>
+                            onClick={handleCreateUserChatList}
+                            disabled={!selectedUserFromDropdown}
+                          >
+                            create
+                          </button>
+                        </>
+                      )} */}
                     </div>
                   </form>
                 </CustomModal>
@@ -337,13 +400,13 @@ export default function ChatPage() {
                   {/* User Avatar */}
                   <div className="flex items-center gap-3">
                     <img
-                      src={handleSenderMessagerName(v).avatar.url ? handleSenderMessagerName(v).avatar.url : `https://dummyjson.com/image/150`}
-                      alt={`${handleSenderMessagerName(v).username}'s avatar`}
+                      src={handleSenderMessagerName(v)?.avatar?.url ? handleSenderMessagerName(v)?.avatar.url : `https://dummyjson.com/image/150`}
+                      alt={`${handleSenderMessagerName(v)?.username}'s avatar`}
                       className="border border-gray-300 w-12 h-12 rounded-full"
                     />
                     <div className="flex flex-col">
                       <div>
-                        <h3 className="text-sm font-medium text-gray-800">{handleSenderMessagerName(v).username}</h3>
+                        <h3 className="text-sm font-medium text-gray-800">{handleSenderMessagerName(v)?.username}</h3>
                       </div>
                       <p className="text-xs text-gray-500 truncate max-w-[12rem] mt-1">{v?.lastMessage?.content || "No recent messages"}</p>
                     </div>
