@@ -251,10 +251,7 @@ export default function ChatPage() {
   };
   return (
     <>
-      <div>
-        <button onClick={() => setIsSheetOpen(true)}>Open Slider</button>
-        <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet} />
-      </div>
+      <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet} />
       <div className="bg-gray-200">
         <div className="flex h-screen bg-gray-200 overflow-hidden">
           {/* Left Sidebar */}
@@ -406,7 +403,7 @@ export default function ChatPage() {
                     />
                     <div className="flex flex-col">
                       <div>
-                        <h3 className="text-sm font-medium text-gray-800">{handleSenderMessagerName(v)?.username}</h3>
+                        <h3 className="text-sm font-medium text-gray-800">{v?.isGroupChat ? v?.name : handleSenderMessagerName(v)?.username}</h3>
                       </div>
                       <p className="text-xs text-gray-500 truncate max-w-[12rem] mt-1">{v?.lastMessage?.content || "No recent messages"}</p>
                     </div>
@@ -422,16 +419,23 @@ export default function ChatPage() {
                     <span className="text-[.8rem] text-gray-600 whitespace-nowrap">
                       {moment(v?.lastMessage?.updatedAt).add("TIME_ZONE", "hours").fromNow(true)} {/* Delete Icon */}
                     </span>
-                    <span
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevents triggering the parent click
-                        handleDeleteChat(v._id);
-                      }}
-                      className="text-gray-600 hover:text-red-500 text-[.8rem] cursor-pointer"
-                      title="Delete chat"
-                    >
-                      &#128465;
-                    </span>
+
+                    {v?.isGroupChat ? (
+                      <>
+                        <span onClick={() => setIsSheetOpen(true)}>||</span>
+                      </>
+                    ) : (
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevents triggering the parent click
+                          handleDeleteChat(v._id);
+                        }}
+                        className="text-gray-600 hover:text-red-500 text-[.8rem] cursor-pointer"
+                        title="Delete chat"
+                      >
+                        &#128465;
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

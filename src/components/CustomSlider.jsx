@@ -3,10 +3,7 @@ import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHe
 export default function CustomSlider({ isOpen, toggleSheet }) {
   return (
     <Sheet open={isOpen} onOpenChange={toggleSheet}>
-      <SheetTrigger asChild>
-        {/* <Button variant="outline">Open</Button> */}
-        <button>click</button>
-      </SheetTrigger>
+      <SheetTrigger asChild></SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Edit profile</SheetTitle>
