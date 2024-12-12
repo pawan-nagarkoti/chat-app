@@ -37,6 +37,7 @@ export default function ChatPage() {
   const [handleToggleButton, setHandleToggleButton] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false); // this is used for toggle side drawer
   const [getGroupChatName, setGetGroupChatName] = useState("");
+  const [hasGropupChat, setHasGroupChat] = useState("");
 
   const handleChange = (selected) => {
     setSelectedOptions(selected);
@@ -161,6 +162,7 @@ export default function ChatPage() {
 
   // get the id when we clicked on chat list
   const handleClickedChatList = (selectedId, v) => {
+    setHasGroupChat(v?.isGroupChat); // is chat user group list?
     setSelectedUsername(handleSenderMessagerName(v));
     getChatId(selectedId);
     getAllMessageData(selectedId);
@@ -448,8 +450,8 @@ export default function ChatPage() {
             {isClickedOnChatList && (
               <>
                 <div className="p-4 bg-white shadow-md">
-                  <h2 className="text-lg font-bold text-gray-700">{selectedUsername?.username.toUpperCase()}</h2>
-                  <p>{selectedUsername?.email}</p>
+                  <h2 className="text-lg font-bold text-gray-700">{hasGropupChat ? "hhhh" : selectedUsername?.username.toUpperCase()}</h2>
+                  <p>{hasGropupChat ? "hhh" : selectedUsername?.email}</p>
                 </div>
                 {/* Chat Messages */}
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
