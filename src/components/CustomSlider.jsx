@@ -1,6 +1,6 @@
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-export default function CustomSlider({ isOpen, toggleSheet }) {
+export default function CustomSlider({ isOpen, toggleSheet, children }) {
   return (
     <Sheet open={isOpen} onOpenChange={toggleSheet}>
       <SheetTrigger asChild></SheetTrigger>
@@ -9,7 +9,7 @@ export default function CustomSlider({ isOpen, toggleSheet }) {
           <SheetTitle>Edit profile</SheetTitle>
           <SheetDescription>Make changes to your profile here. Click save when you're done.</SheetDescription>
         </SheetHeader>
-        <div>pawan</div>
+        <div>{children}</div>
         <SheetFooter>
           <SheetClose asChild>{/* <Button type="submit">Save changes</Button> */}</SheetClose>
         </SheetFooter>

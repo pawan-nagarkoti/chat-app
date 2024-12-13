@@ -63,3 +63,15 @@ export const deleteSingleMessage = (deletedChatId, deletedMessageId) => {
 export const createGroupChat = (data) => {
   return apiClient.post(`chat-app/chats/group`, data);
 };
+
+export const getGroupChatDetail = (chatId) => {
+  return apiClient.get(`chat-app/chats/group/${chatId}`);
+};
+
+export const updateGroupChatName = (chatId, updatedGroupName) => {
+  return apiClient.patch(`chat-app/chats/group/${chatId}`, updatedGroupName);
+};
+
+export const removeParticipant = (chatId, partipantId) => {
+  return apiClient.delete(`chat-app/chats/group/${chatId}/${partipantId}`);
+};

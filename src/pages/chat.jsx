@@ -9,6 +9,9 @@ import {
   deleteUserList,
   deleteSingleMessage,
   createGroupChat,
+  getGroupChatDetail,
+  updateGroupChatName,
+  removeParticipant,
 } from "@/api";
 import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
@@ -38,6 +41,15 @@ export default function ChatPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false); // this is used for toggle side drawer
   const [getGroupChatName, setGetGroupChatName] = useState("");
   const [hasGropupChat, setHasGroupChat] = useState("");
+  const [selectedSingleChatListData, setSelectedSingleChatListData] = useState("");
+  const [isEditGroupNameBtnClicked, setIsEditGroupNameBtnClicked] = useState(false);
+  const [isAddParticipantClicked, setIsAddParticipantClicked] = useState(false);
+  const [editGroupName, setEditGroupName] = useState(selectedSingleChatListData?.name || "");
+
+  // this useeffect is used for when we edit group name and its set the default value on the input box
+  useEffect(() => {
+    setEditGroupName(selectedSingleChatListData?.name || "");
+  }, [selectedSingleChatListData]);
 
   const handleChange = (selected) => {
     setSelectedOptions(selected);
@@ -162,6 +174,8 @@ export default function ChatPage() {
 
   // get the id when we clicked on chat list
   const handleClickedChatList = (selectedId, v) => {
+    console.log("sfslfjdslfjsldjflsdf", v);
+    setSelectedSingleChatListData(v);
     setHasGroupChat(v?.isGroupChat); // is chat user group list?
     setSelectedUsername(handleSenderMessagerName(v));
     getChatId(selectedId);
@@ -251,9 +265,133 @@ export default function ChatPage() {
   const toggleSheet = (open) => {
     setIsSheetOpen(open);
   };
+
+  // updated group name
+  const handleUpdateGroupName = async () => {
+    await requestHandler(
+      () => updateGroupChatName(selectedSingleChatListData?._id, { name: editGroupName }),
+      null,
+      async (data) => {
+        setIsEditGroupNameBtnClicked((prev) => !prev);
+        await allUserChatListData();
+        getAllMessages(chatId);
+      },
+      (error) => {
+        console.error("Updated Group Name", error);
+        alert(error);
+      }
+    );
+  };
+
+  // Remove participants from group
+  const handleRemoveParticipants = async (v) => {
+    await requestHandler(
+      () => removeParticipant(chatId, v._id),
+      null,
+      async (data) => {
+        confirm("Are you sure you want to delete");
+      },
+      (error) => {
+        console.error("Updated Group Name", error);
+        alert(error);
+      }
+    );
+  };
   return (
     <>
-      <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet} />
+      <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet}>
+        <div className="p-4 space-y-4 bg-gray-100 rounded-lg shadow-md">
+          {/* Group Info */}
+          <div className="flex items-center justify-between">
+            {isEditGroupNameBtnClicked ? (
+              <div className="flex flex-col w-full">
+                <input
+                  type="text"
+                  name=""
+                  id=""
+                  value={editGroupName}
+                  className="px-2 py-2 w-full mb-3"
+                  onChange={(e) => setEditGroupName(e.target.value)}
+                />
+                {/* <div className="flex flex-col gap-2"> */}
+                <button className="w-full px-4 py-2 mb-3 text-sm font-medium text-white bg-green-500 rounded-md" onClick={handleUpdateGroupName}>
+                  save
+                </button>
+                <button
+                  className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md"
+                  onClick={() => setIsEditGroupNameBtnClicked((pre) => !pre)}
+                >
+                  Cancel
+                </button>
+                {/* </div> */}
+              </div>
+            ) : (
+              <>
+                <span className="text-lg font-semibold text-gray-800">{selectedSingleChatListData?.name}</span>
+                <button
+                  className="px-2 py-1 bg-green-500 text-white text-xs font-medium rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300"
+                  onClick={() => setIsEditGroupNameBtnClicked((pre) => !pre)}
+                >
+                  edit
+                </button>
+              </>
+            )}
+          </div>
+
+          <hr className="border-gray-300" />
+          <p className="font-medium text-gray-800">{selectedSingleChatListData?.participants?.length} Participants</p>
+
+          {/* Participant List */}
+          <div className="space-y-4">
+            {selectedSingleChatListData?.participants?.map((v, i) => (
+              <div className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <span className="block text-gray-800 font-medium text-sm">{v.username}</span>
+                    {v?._id === selectedSingleChatListData?.admin && (
+                      <p className="inline-block px-2 py-1 mt-1 text-xs font-semibold text-white bg-green-500 rounded-md">Admin</p>
+                    )}
+                  </div>
+                  <span className="block text-sm text-gray-600">{v.email}</span>
+                </div>
+                <button
+                  className="px-3 py-1 text-sm text-red-500 border border-red-500 rounded-md hover:bg-red-100"
+                  onClick={() => handleRemoveParticipants(v)}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <hr className="border-gray-300" />
+          </div>
+
+          {/* Actions */}
+          {isAddParticipantClicked ? (
+            <>
+              <Dropdown ref={dropdownRef} label="Add Participant" options={userList} onChange={handleDropdownChange} />
+              <button className="w-full px-4 py-2 mt-1 text-sm font-medium text-white bg-green-500 rounded-md">save</button>
+              <button
+                className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md "
+                onClick={() => setIsAddParticipantClicked((pre) => !pre)}
+              >
+                cancel
+              </button>
+            </>
+          ) : (
+            <button
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+              onClick={() => setIsAddParticipantClicked((pre) => !pre)}
+            >
+              Add Participant
+            </button>
+          )}
+
+          <button className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300">
+            Delete Group
+          </button>
+        </div>
+      </CustomSlider>
       <div className="bg-gray-200">
         <div className="flex h-screen bg-gray-200 overflow-hidden">
           {/* Left Sidebar */}
@@ -450,8 +588,14 @@ export default function ChatPage() {
             {isClickedOnChatList && (
               <>
                 <div className="p-4 bg-white shadow-md">
-                  <h2 className="text-lg font-bold text-gray-700">{hasGropupChat ? "hhhh" : selectedUsername?.username.toUpperCase()}</h2>
-                  <p>{hasGropupChat ? "hhh" : selectedUsername?.email}</p>
+                  <h2 className="text-lg font-bold text-gray-700">
+                    {selectedSingleChatListData?.isGroupChat ? selectedSingleChatListData?.name : selectedUsername?.username.toUpperCase()}
+                  </h2>
+                  <p>
+                    {selectedSingleChatListData?.isGroupChat
+                      ? `${selectedSingleChatListData?.participants?.length} members in the chat`
+                      : selectedUsername?.email}
+                  </p>
                 </div>
                 {/* Chat Messages */}
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
