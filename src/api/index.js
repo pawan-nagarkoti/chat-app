@@ -79,3 +79,7 @@ export const removeParticipant = (chatId, partipantId) => {
 export const deleteGroup = (chatId) => {
   return apiClient.delete(`chat-app/chats/group/${chatId}`);
 };
+
+export const addParticipant = (chatId, partipantId) => {
+  return apiClient.post(`chat-app/chats/group/${chatId}/${partipantId}`);
+};

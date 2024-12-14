@@ -13,6 +13,7 @@ import {
   updateGroupChatName,
   removeParticipant,
   deleteGroup,
+  addParticipant,
 } from "@/api";
 import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
@@ -311,6 +312,22 @@ export default function ChatPage() {
       }
     );
   };
+
+  // Add participant
+  const handleAddParticipant = async () => {
+    await requestHandler(
+      () => addParticipant(chatId, selectedUserFromDropdown),
+      null,
+      async (data) => {
+        setIsAddParticipantClicked((pre) => !pre);
+        alert("New Participant Added");
+      },
+      (error) => {
+        console.error("Add Participant", error);
+        alert(error);
+      }
+    );
+  };
   return (
     <>
       <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet}>
@@ -384,7 +401,9 @@ export default function ChatPage() {
           {isAddParticipantClicked ? (
             <>
               <Dropdown ref={dropdownRef} label="Add Participant" options={userList} onChange={handleDropdownChange} />
-              <button className="w-full px-4 py-2 mt-1 text-sm font-medium text-white bg-green-500 rounded-md">save</button>
+              <button className="w-full px-4 py-2 mt-1 text-sm font-medium text-white bg-green-500 rounded-md" onClick={() => handleAddParticipant()}>
+                save
+              </button>
               <button
                 className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md "
                 onClick={() => setIsAddParticipantClicked((pre) => !pre)}
