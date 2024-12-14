@@ -12,6 +12,7 @@ import {
   getGroupChatDetail,
   updateGroupChatName,
   removeParticipant,
+  deleteGroup,
 } from "@/api";
 import { requestHandler, formatTime } from "@/utils";
 import CustomModal from "@/components/CustomModal";
@@ -297,6 +298,19 @@ export default function ChatPage() {
       }
     );
   };
+
+  // Deleted group
+  const handleDeletedGroup = async () => {
+    await requestHandler(
+      () => deleteGroup(chatId),
+      null,
+      async (data) => {},
+      (error) => {
+        console.error("Delete Group", error);
+        alert(error);
+      }
+    );
+  };
   return (
     <>
       <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet}>
@@ -387,7 +401,10 @@ export default function ChatPage() {
             </button>
           )}
 
-          <button className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300">
+          <button
+            className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
+            onClick={handleDeletedGroup}
+          >
             Delete Group
           </button>
         </div>

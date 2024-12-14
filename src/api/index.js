@@ -75,3 +75,7 @@ export const updateGroupChatName = (chatId, updatedGroupName) => {
 export const removeParticipant = (chatId, partipantId) => {
   return apiClient.delete(`chat-app/chats/group/${chatId}/${partipantId}`);
 };
+
+export const deleteGroup = (chatId) => {
+  return apiClient.delete(`chat-app/chats/group/${chatId}`);
+};
