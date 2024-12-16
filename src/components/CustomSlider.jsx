@@ -6,10 +6,10 @@ export default function CustomSlider({ isOpen, toggleSheet, children }) {
       <SheetTrigger asChild></SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Edit profile</SheetTitle>
-          <SheetDescription>Make changes to your profile here. Click save when you're done.</SheetDescription>
+          <SheetTitle>Group Information</SheetTitle>
+          <SheetDescription></SheetDescription>
         </SheetHeader>
-        <div>{children}</div>
+        <div className="overflow-auto h-screen">{children}</div>
         <SheetFooter>
           <SheetClose asChild>{/* <Button type="submit">Save changes</Button> */}</SheetClose>
         </SheetFooter>

@@ -106,6 +106,12 @@ export default function ChatPage() {
       () => allUserChatList(),
       null,
       (data) => {
+        // when we remove the participants from the group rest participant are showing on the UI without page refresh
+        const selectedChat = data?.data?.find((v) => v._id === chatId);
+        console.log("selectedChat", selectedChat);
+        if (selectedChat) {
+          setSelectedSingleChatListData(selectedChat);
+        }
         setAllUserChatListDetailData(data);
       },
       (error) => {
@@ -176,7 +182,6 @@ export default function ChatPage() {
 
   // get the id when we clicked on chat list
   const handleClickedChatList = (selectedId, v) => {
-    console.log("sfslfjdslfjsldjflsdf", v);
     setSelectedSingleChatListData(v);
     setHasGroupChat(v?.isGroupChat); // is chat user group list?
     setSelectedUsername(handleSenderMessagerName(v));
@@ -255,7 +260,7 @@ export default function ChatPage() {
       null,
       (data) => {
         getAllMessageData(chatId);
-        confirm("Are you sure you want to delte this message");
+        alert("Are you sure you want to delte this message");
       },
       (error) => {
         console.error("Delete one one chat :", error);
@@ -287,11 +292,13 @@ export default function ChatPage() {
 
   // Remove participants from group
   const handleRemoveParticipants = async (v) => {
+    console.log("v.id,chatid", v._id, chatId);
     await requestHandler(
       () => removeParticipant(chatId, v._id),
       null,
       async (data) => {
-        confirm("Are you sure you want to delete");
+        alert("Deleted Participatant");
+        allUserChatListData();
       },
       (error) => {
         console.error("Updated Group Name", error);
@@ -305,7 +312,11 @@ export default function ChatPage() {
     await requestHandler(
       () => deleteGroup(chatId),
       null,
-      async (data) => {},
+      async (data) => {
+        alert("Group is deleted");
+        allUserChatListData();
+        setIsSheetOpen(false);
+      },
       (error) => {
         console.error("Delete Group", error);
         alert(error);
@@ -320,6 +331,7 @@ export default function ChatPage() {
       null,
       async (data) => {
         setIsAddParticipantClicked((pre) => !pre);
+        allUserChatListData();
         alert("New Participant Added");
       },
       (error) => {
@@ -331,7 +343,7 @@ export default function ChatPage() {
   return (
     <>
       <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet}>
-        <div className="p-4 space-y-4 bg-gray-100 rounded-lg shadow-md">
+        <div className="p-4 space-y-4 bg-gray-100 rounded-lg shadow-md mb-[4rem]">
           {/* Group Info */}
           <div className="flex items-center justify-between">
             {isEditGroupNameBtnClicked ? (
@@ -375,7 +387,7 @@ export default function ChatPage() {
           {/* Participant List */}
           <div className="space-y-4">
             {selectedSingleChatListData?.participants?.map((v, i) => (
-              <div className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm">
+              <div className="flex items-center justify-between p-3 bg-white border rounded-md shadow-sm" key={i}>
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="block text-gray-800 font-medium text-sm">{v.username}</span>
@@ -421,7 +433,7 @@ export default function ChatPage() {
           )}
 
           <button
-            className="w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
+            className=" w-full px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
             onClick={handleDeletedGroup}
           >
             Delete Group
@@ -598,7 +610,9 @@ export default function ChatPage() {
 
                     {v?.isGroupChat ? (
                       <>
-                        <span onClick={() => setIsSheetOpen(true)}>||</span>
+                        <span onClick={() => setIsSheetOpen(true)} className="font-bold text-3xl">
+                          :
+                        </span>
                       </>
                     ) : (
                       <span
