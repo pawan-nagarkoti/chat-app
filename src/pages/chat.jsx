@@ -108,7 +108,6 @@ export default function ChatPage() {
       (data) => {
         // when we remove the participants from the group rest participant are showing on the UI without page refresh
         const selectedChat = data?.data?.find((v) => v._id === chatId);
-        console.log("selectedChat", selectedChat);
         if (selectedChat) {
           setSelectedSingleChatListData(selectedChat);
         }
@@ -223,6 +222,7 @@ export default function ChatPage() {
       setLoading,
       (data) => {
         allUserChatListData();
+        setIsClickedOnChatList(false);
         alert("deleted user");
       },
       (error) => {
@@ -316,6 +316,7 @@ export default function ChatPage() {
         alert("Group is deleted");
         allUserChatListData();
         setIsSheetOpen(false);
+        setIsClickedOnChatList(false);
       },
       (error) => {
         console.error("Delete Group", error);
