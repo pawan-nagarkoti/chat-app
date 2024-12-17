@@ -398,12 +398,14 @@ export default function ChatPage() {
                   </div>
                   <span className="block text-sm text-gray-600">{v.email}</span>
                 </div>
-                <button
-                  className="px-3 py-1 text-sm text-red-500 border border-red-500 rounded-md hover:bg-red-100"
-                  onClick={() => handleRemoveParticipants(v)}
-                >
-                  Remove
-                </button>
+                {localStorage.getItem("loginUserId") === selectedSingleChatListData?.admin && (
+                  <button
+                    className="px-3 py-1 text-sm text-red-500 border border-red-500 rounded-md hover:bg-red-100"
+                    onClick={() => handleRemoveParticipants(v)}
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             ))}
 
