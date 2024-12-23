@@ -93,3 +93,31 @@
   background-color: rgba(0, 0, 0, 0.1) !important; /* Track color */
   border-radius: 10px !important; /* Rounded corners for the track */
 }
+
+/* animation */
+
+@keyframes bounce {
+  0% {
+    transform: translateY(-60%);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(20%);
+    opacity: 1;
+  }
+}
+
+.animation1 {
+  animation: bounce 0.4s ease-in-out infinite alternate;
+  animation-delay: -0.4s;
+}
+
+.animation2 {
+  animation: bounce 0.4s ease-in-out infinite alternate;
+  animation-delay: -0.2s;
+}
+
+.animation3 {
+  animation: bounce 0.4s ease-in-out infinite alternate;
+  animation-delay: 0s;
+}

@@ -21,6 +21,20 @@ import React, { useState, useRef, useEffect } from "react";
 import { Children } from "react";
 import { Dropdown, MultiSelect, Input, CustomSlider } from "@/components";
 import moment from "moment";
+import { useSocket } from "../context/SocketContext";
+import Typing from "@/components/Typing";
+
+const CONNECTED_EVENT = "connected";
+const DISCONNECT_EVENT = "disconnect";
+const JOIN_CHAT_EVENT = "joinChat";
+const NEW_CHAT_EVENT = "newChat";
+const TYPING_EVENT = "typing";
+const STOP_TYPING_EVENT = "stopTyping";
+const MESSAGE_RECEIVED_EVENT = "messageReceived";
+const LEAVE_CHAT_EVENT = "leaveChat";
+const UPDATE_GROUP_NAME_EVENT = "updateGroupName";
+const MESSAGE_DELETE_EVENT = "messageDeleted";
+// const SOCKET_ERROR_EVENT = "socketError";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -47,6 +61,20 @@ export default function ChatPage() {
   const [isEditGroupNameBtnClicked, setIsEditGroupNameBtnClicked] = useState(false);
   const [isAddParticipantClicked, setIsAddParticipantClicked] = useState(false);
   const [editGroupName, setEditGroupName] = useState(selectedSingleChatListData?.name || "");
+  const [isTyping, setIsTyping] = useState(false);
+  const [selfTyping, setSelfTyping] = useState(false);
+
+  const [isConnected, setIsConnected] = useState(false); // For tracking socket connection
+  const { socket } = useSocket();
+  const typingTimeoutRef = useRef(null);
+
+  const onConnect = () => {
+    setIsConnected(true);
+  };
+
+  const onDisconnect = () => {
+    setIsConnected(false);
+  };
 
   // this useeffect is used for when we edit group name and its set the default value on the input box
   useEffect(() => {
@@ -181,6 +209,7 @@ export default function ChatPage() {
 
   // get the id when we clicked on chat list
   const handleClickedChatList = (selectedId, v) => {
+    console.log(v);
     setSelectedSingleChatListData(v);
     setHasGroupChat(v?.isGroupChat); // is chat user group list?
     setSelectedUsername(handleSenderMessagerName(v));
@@ -341,6 +370,88 @@ export default function ChatPage() {
       }
     );
   };
+
+  // this function is used for handle message when user type on text box
+  const handleMessage = (e) => {
+    getSendInputMessage(e.target.value);
+
+    // Check if the user isn't already set as typing
+    if (!selfTyping) {
+      // Set the user as typing
+      setSelfTyping(true);
+
+      // Emit a typing event to the server for the current chat
+      socket.emit(TYPING_EVENT, handleSenderMessagerName(selectedSingleChatListData)._id);
+    }
+
+    // Clear the previous timeout (if exists) to avoid multiple setTimeouts from running
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Define a length of time (in milliseconds) for the typing timeout
+    const timerLength = 3000;
+
+    // Set a timeout to stop the typing indication after the timerLength has passed
+    typingTimeoutRef.current = setTimeout(() => {
+      // Emit a stop typing event to the server for the current chat
+      socket.emit(STOP_TYPING_EVENT, handleSenderMessagerName(selectedSingleChatListData)._id);
+
+      // Reset the user's typing state
+      setSelfTyping(false);
+    }, timerLength);
+  };
+
+  const onMessageReceived = (message) => {
+    setAllMessage((pre) => [...pre, message]);
+  };
+
+  const handleOnSocketTyping = (chatIds) => {
+    setIsTyping(true);
+  };
+
+  const handleOnSocketStopTyping = (chatId) => {
+    setIsTyping(false);
+  };
+
+  // This useEffect handles the setting up and tearing down of socket event listeners.
+  useEffect(() => {
+    // If the socket isn't initialized, we don't set up listeners.
+    if (!socket) return;
+
+    // Set up event listeners for various socket events:
+    // Listener for when the socket connects.
+    socket.on(CONNECTED_EVENT, onConnect);
+    // Listener for when the socket disconnects.
+    socket.on(DISCONNECT_EVENT, onDisconnect);
+    // // Listener for when a user is typing.
+    socket.on(TYPING_EVENT, handleOnSocketTyping);
+    // // Listener for when a user stops typing.
+    socket.on(STOP_TYPING_EVENT, handleOnSocketStopTyping);
+    // // Listener for when a new message is received.
+    socket.on(MESSAGE_RECEIVED_EVENT, onMessageReceived);
+    // // Listener for the initiation of a new chat.
+    // socket.on(NEW_CHAT_EVENT, onNewChat);
+    // // Listener for when a user leaves a chat.
+    // socket.on(LEAVE_CHAT_EVENT, onChatLeave);
+    // // Listener for when a group's name is updated.
+    // socket.on(UPDATE_GROUP_NAME_EVENT, onGroupNameChange);
+    // //Listener for when a message is deleted
+    // socket.on(MESSAGE_DELETE_EVENT, onMessageDelete);
+    // When the component using this hook unmounts or if `socket` or `chats` change:
+    return () => {
+      // Remove all the event listeners we set up to avoid memory leaks and unintended behaviors.
+      socket.off(CONNECTED_EVENT, onConnect);
+      socket.off(DISCONNECT_EVENT, onDisconnect);
+      socket.off(TYPING_EVENT, handleOnSocketTyping);
+      socket.off(STOP_TYPING_EVENT, handleOnSocketStopTyping);
+      socket.off(MESSAGE_RECEIVED_EVENT, onMessageReceived);
+      // socket.off(NEW_CHAT_EVENT, onNewChat);
+      // socket.off(LEAVE_CHAT_EVENT, onChatLeave);
+      // socket.off(UPDATE_GROUP_NAME_EVENT, onGroupNameChange);
+      // socket.off(MESSAGE_DELETE_EVENT, onMessageDelete);
+    };
+  }, [socket]);
   return (
     <>
       <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet}>
@@ -695,6 +806,10 @@ export default function ChatPage() {
                   ))}
                 </div>
 
+                <div className="" style={{ padding: ".5rem", background: "#fff" }}>
+                  {isTyping ? <Typing /> : null}
+                </div>
+
                 {/* selected images */}
                 <div className="flex gap-4">
                   {selectedFiles.map((file, index) => (
@@ -738,7 +853,8 @@ export default function ChatPage() {
                       placeholder="Type a message..."
                       value={sendInputMessage}
                       className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-                      onChange={(e) => getSendInputMessage(e.target.value)}
+                      // onChange={(e) => getSendInputMessage(e.target.value)}
+                      onChange={(e) => handleMessage(e)}
                     />
                     <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
                       Send
