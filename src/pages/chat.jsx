@@ -68,6 +68,10 @@ export default function ChatPage() {
   const { socket } = useSocket();
   const typingTimeoutRef = useRef(null);
 
+  // when send the message its scroll to the bottom of message container
+  const containerRef = useRef(null);
+  const [hasBottomContent, setHasBottomContent] = useState(false);
+
   const onConnect = () => {
     setIsConnected(true);
   };
@@ -236,6 +240,7 @@ export default function ChatPage() {
         setSelectedFiles([]);
         await allUserChatListData();
         await getAllMessageData(chatId);
+        setHasBottomContent(true);
       },
       (error) => {
         console.error("Login failed:", error);
@@ -452,6 +457,28 @@ export default function ChatPage() {
       // socket.off(MESSAGE_DELETE_EVENT, onMessageDelete);
     };
   }, [socket]);
+
+  // This use effect is used for handle the message container scrolling
+  useEffect(() => {
+    if (hasBottomContent && containerRef.current) {
+      // Scroll the container to the bottom
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+      setHasBottomContent(false);
+    }
+  }, [hasBottomContent]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo({
+        top: containerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [allMessage]); // Trigger when messages update
+
   return (
     <>
       <CustomSlider isOpen={isSheetOpen} toggleSheet={toggleSheet}>
@@ -762,7 +789,7 @@ export default function ChatPage() {
                   </p>
                 </div>
                 {/* Chat Messages */}
-                <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+                <div className="flex-1 p-4 overflow-y-auto bg-gray-50" ref={containerRef}>
                   {allMessage?.map((v, i) => (
                     <div key={i}>
                       {/* Incoming Message */}
