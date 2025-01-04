@@ -726,7 +726,8 @@ export default function ChatPage() {
                   {/* User Avatar */}
                   <div className="flex items-center gap-3">
                     <img
-                      src={handleSenderMessagerName(v)?.avatar?.url ? handleSenderMessagerName(v)?.avatar.url : `https://dummyjson.com/image/150`}
+                      src="https://avatar.iran.liara.run/public"
+                      // src={handleSenderMessagerName(v)?.avatar?.url ? handleSenderMessagerName(v)?.avatar.url : `https://dummyjson.com/image/150`}
                       alt={`${handleSenderMessagerName(v)?.username}'s avatar`}
                       className="border border-gray-300 w-12 h-12 rounded-full"
                     />
